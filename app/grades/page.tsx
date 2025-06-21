@@ -24,7 +24,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
 
 // Available class options
 const CLASS_OPTIONS = ['Math', 'Science', 'History'];
@@ -118,8 +118,8 @@ export default function GradesPage() {
         </Typography>
 
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+            <Box sx={{ width: { xs: '100%', md: '50%' } }}>
               <FormControl fullWidth margin="normal" required>
                 <InputLabel id="class-select-label">Class</InputLabel>
                 <Select
@@ -139,8 +139,8 @@ export default function GradesPage() {
                   ))}
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6}>
+            </Box>
+            <Box sx={{ width: { xs: '100%', md: '50%' } }}>
               <TextField
                 label="Grade Value"
                 type="number"
@@ -154,8 +154,8 @@ export default function GradesPage() {
                 helperText={error || 'Enter a grade between 0 and 100'}
                 disabled={submitting}
               />
-            </Grid>
-          </Grid>
+            </Box>
+          </Stack>
 
           <Button 
             type="submit" 
@@ -182,9 +182,9 @@ export default function GradesPage() {
         <>
           {/* Class statistics summary */}
           <Box sx={{ mb: 4 }}>
-            <Grid container spacing={2}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
               {classStats.map((stat: any) => (
-                <Grid item xs={12} md={4} key={stat.class}>
+                <Box key={stat.class} sx={{ width: { xs: '100%', md: 'calc(33.33% - 16px)' } }}>
                   <Card>
                     <CardContent>
                       <Typography variant="h6" color="primary" gutterBottom>{stat.class}</Typography>
@@ -194,9 +194,9 @@ export default function GradesPage() {
                       <Typography variant="body1">Count: {stat.count}</Typography>
                     </CardContent>
                   </Card>
-                </Grid>
+                </Box>
               ))}
-            </Grid>
+            </Box>
           </Box>
 
           {/* Detailed grades table */}
