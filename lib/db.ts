@@ -1,8 +1,8 @@
-import { PrismaClient } from "@prisma/client/extension";
+// Import postgres for raw SQL queries (primary database access method)
 import postgres from "postgres";
 
-// For Prisma schema/migrations only
-export const prisma = new PrismaClient();
+// Note: Prisma is only used for schema/migrations
+// All runtime queries use postgres client
 
 // Connection options
 const connectionOptions = {
@@ -26,7 +26,7 @@ const sql = postgres({
   max: connectionOptions.max,
   idle_timeout: connectionOptions.idle_timeout,
   connect_timeout: connectionOptions.connect_timeout,
-  ssl: true,
+  ssl: false, // Disable SSL for local development
 });
 
 export default sql;

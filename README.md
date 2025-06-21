@@ -1,30 +1,33 @@
-# Alison Full Stack Developer Assessment
+# Next.js Full-Stack Application
 
-This technical assessment evaluates your proficiency in developing a modern full-stack web application using React, Next.js, and PostgreSQL. You will demonstrate your ability to create web application with database integration and efficient data handling.
+A modern full-stack web application built with Next.js (App Router), React, and PostgreSQL with raw SQL queries. This application demonstrates database integration, form handling, data visualization, and efficient client-side data fetching.
 
-## Project Overview
+## Overview
 
-You will build a web application that demonstrates your proficiency in:
+This application demonstrates:
 
-- Frontend development with React and Next.js
-- Raw SQL database operations
-- Form handling and validation
+- Next.js App Router with client and server components
+- Raw SQL database operations with the `postgres` npm package
+- Prisma for schema management (migrations only)
+- Material UI for component styling
+- Client-side data fetching with SWR
+- Form handling and validation with Zod
 
-## Technical Requirements
+## Features
 
-### Environment Setup
+- **Numbers Page**: Add numbers and view adjacent pairs with their sums
+- **Grades Page**: Record student grades and view statistics by class
+- **Comprehensive Testing**: Unit and integration tests for API endpoints and UI components
 
-- Install Node.js and pnpm using [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm)
-- Set up a PostgreSQL database using Docker.
+## Technology Stack
 
-```bash
-docker run --name postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres
-```
-
-- Choose and implement a database connection method:
-  - Direct database connection using [`postgres`](https://github.com/porsager/postgres) or any other client
-  - ORM (Prisma, Drizzle, or TypeORM) for schema management and connection only
-  - Connection pooling recommended for performance optimization
+- **Frontend**: React 19, Material UI v5, SWR
+- **Backend**: Next.js API Routes, PostgreSQL
+- **Database Access**: `postgres` npm package with raw SQL
+- **Schema Management**: Prisma (for migrations only)
+- **Testing**: Jest, React Testing Library
+- **Validation**: Zod
+- **Package Manager**: pnpm
 
 ### Project Requirements
 
@@ -87,17 +90,73 @@ Create a form with:
 
 ## Getting Started
 
-1. Fork the repository
-2. Clone the forked repository to your local machine
-3. Install dependencies: `pnpm install`
-4. Start PostgreSQL: Use the Docker command above
-5. Run development server: pnpm dev
-6. Access the application: <http://localhost:3000>
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+3. Set up PostgreSQL using Docker:
+   ```bash
+   docker run --name postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres
+   ```
+4. Generate Prisma client (important!):
+   ```bash
+   pnpm prisma generate
+   ```
+5. Apply database migrations:
+   ```bash
+   pnpm prisma migrate dev
+   ```
+6. Start the development server:
+   ```bash
+   pnpm dev
+   ```
+7. Access the application at [http://localhost:3000](http://localhost:3000)
 
-## Submission Guidelines
+## Database Schema
 
-- Ensure all features are working
-- Include database schema
-- Document any assumptions or decisions made during development
-- Push your code to your forked repository
-- Notify us once you have completed the assessment
+### Numbers Table
+```sql
+CREATE TABLE numbers (
+  id SERIAL PRIMARY KEY,
+  value INTEGER NOT NULL
+);
+```
+
+### Grades Table
+```sql
+CREATE TABLE grades (
+  id SERIAL PRIMARY KEY,
+  class VARCHAR(255) NOT NULL,
+  value INTEGER NOT NULL CHECK (value >= 0 AND value <= 100)
+);
+```
+
+## Testing
+
+To run the test suite:
+
+```bash
+pnpm test
+```
+
+Tests include:
+- API route unit tests for `/api/numbers` and `/api/grades` endpoints
+- Component tests for UI elements
+
+## Project Structure
+
+- `app/` - Next.js App Router pages and components
+- `app/api/` - API routes for data operations
+- `app/components/` - Shared React components
+- `lib/` - Utility functions and database connection
+- `prisma/` - Database schema and migrations
+- `__tests__/` - Test files
+
+## Implementation Notes
+
+- Raw SQL is used for all runtime database operations
+- Prisma is only used for schema definition and migrations
+- The application uses a client-side data fetching strategy with SWR
+- All forms include proper validation and error handling
+- See IMPLEMENTATION.md for more detailed architecture decisions

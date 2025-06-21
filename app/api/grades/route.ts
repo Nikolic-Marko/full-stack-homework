@@ -11,10 +11,11 @@ const gradeSchema = z.object({
 // GET handler for fetching grades with statistics
 export async function GET() {
   try {
-    // Using window functions to calculate statistics for each class
+    // Using window functions to calculate statistics for each class  
     const result = await sql`
       WITH grade_stats AS (
         SELECT
+          id,
           class,
           value,
           AVG(value) OVER (PARTITION BY class) AS avg_grade,
@@ -23,20 +24,18 @@ export async function GET() {
           COUNT(*) OVER (PARTITION BY class) AS total_entries,
           RANK() OVER (PARTITION BY class ORDER BY value DESC) as rank_in_class
         FROM grades
-        ORDER BY class, value DESC
       )
       SELECT 
-        g.id,
-        g.class,
-        g.value,
-        gs.avg_grade,
-        gs.min_grade,
-        gs.max_grade,
-        gs.total_entries,
-        gs.rank_in_class
-      FROM grades g
-      JOIN grade_stats gs ON g.class = gs.class AND g.value = gs.value
-      ORDER BY g.class, gs.rank_in_class;
+        id,
+        class,
+        value,
+        avg_grade,
+        min_grade,
+        max_grade,
+        total_entries,
+        rank_in_class
+      FROM grade_stats
+      ORDER BY class, rank_in_class;
     `;
 
     return NextResponse.json({ data: result }, { status: 200 });
