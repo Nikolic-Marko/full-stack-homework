@@ -134,6 +134,7 @@ export default function GradesPage() {
                   onChange={(e) => setSelectedClass(e.target.value)}
                   disabled={submitting}
                   error={!!error}
+                  sx={{ minWidth: 180 }}
                 >
                   {CLASS_OPTIONS.map((option) => (
                     <MenuItem key={option} value={option}>
