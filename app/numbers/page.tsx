@@ -18,6 +18,8 @@ import TableRow from '@mui/material/TableRow';
 import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
+import ErrorBoundary from '@/app/components/ErrorBoundary';
+import LoadingSkeleton from '@/app/components/LoadingSkeleton';
 
 // Schema for validating the number input
 const numberSchema = z.object({
@@ -76,10 +78,11 @@ export default function NumbersPage() {
   };
 
   return (
-    <Container maxWidth="md">
-      <Typography variant="h4" component="h1" gutterBottom>
-        Number Pairs
-      </Typography>
+    <ErrorBoundary>
+      <Container maxWidth="md">
+        <Typography variant="h4" component="h1" gutterBottom>
+          Number Pairs
+        </Typography>
 
       <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
         <Typography variant="h6" component="h2" gutterBottom>
@@ -116,9 +119,7 @@ export default function NumbersPage() {
       </Typography>
 
       {isLoading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <CircularProgress />
-        </Box>
+        <LoadingSkeleton type="table" rows={5} />
       ) : data?.data?.length === 0 ? (
         <Alert severity="info">No number pairs available. Add at least two numbers to see pairs.</Alert>
       ) : (
@@ -147,6 +148,7 @@ export default function NumbersPage() {
           </Table>
         </TableContainer>
       )}
-    </Container>
+      </Container>
+    </ErrorBoundary>
   );
 }
