@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import useSWR from 'swr';
 import { z } from 'zod';
+import { fetcher } from '@/lib/fetcher';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
@@ -34,11 +35,6 @@ const gradeSchema = z.object({
   value: z.coerce.number().int().min(0).max(100)
 });
 
-// Fetcher function for SWR
-const fetcher = (url: string) => fetch(url).then(res => {
-  if (!res.ok) throw new Error('Failed to fetch data');
-  return res.json();
-});
 
 export default function GradesPage() {
   const [selectedClass, setSelectedClass] = useState('');
