@@ -1,0 +1,34 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Define the Number model for storing integers
+model Number {
+  id        Int      @id @default(autoincrement())
+  value     Int
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("numbers")
+}
+
+// Define the Grade model for storing class grades
+model Grade {
+  id        Int      @id @default(autoincrement())
+  class     String   // Math, Science, History
+  value     Int      // Between 0 and 100
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("grades")
+}
