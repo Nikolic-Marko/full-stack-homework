@@ -26,10 +26,8 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Stack from "@mui/material/Stack";
 
-// Available class options
 const CLASS_OPTIONS = ["Math", "Science", "History"];
 
-// Schema for validating the grade input
 const gradeSchema = z.object({
   class: z.enum(["Math", "Science", "History"]),
   value: z.coerce.number().int().min(0).max(100),
@@ -41,7 +39,6 @@ export default function GradesPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // SWR hook for fetching and revalidating data
   const { data, isLoading, mutate } = useSWR("/api/grades", fetcher, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
@@ -53,13 +50,11 @@ export default function GradesPage() {
     setSubmitting(true);
 
     try {
-      // Validate input
       const validatedData = gradeSchema.parse({
         class: selectedClass,
         value: gradeValue,
       });
 
-      // Submit to API
       const response = await fetch("/api/grades", {
         method: "POST",
         headers: {
@@ -73,7 +68,6 @@ export default function GradesPage() {
         throw new Error(errorData.error || "Failed to add grade");
       }
 
-      // Clear form and refresh data
       setSelectedClass("");
       setGradeValue("");
       mutate();

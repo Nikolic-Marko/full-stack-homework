@@ -1,17 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
-import sql from '@/lib/db';
-import { z } from 'zod';
+import { NextRequest, NextResponse } from "next/server";
+import sql from "@/lib/db";
+import { z } from "zod";
 
-// Schema for validating grade input
 const gradeSchema = z.object({
-  class: z.enum(['Math', 'Science', 'History']),
+  class: z.enum(["Math", "Science", "History"]),
   value: z.number().int().min(0).max(100),
 });
 
-// GET handler for fetching grades with statistics
 export async function GET() {
   try {
-    // Using window functions to calculate statistics for each class  
     const result = await sql`
       WITH grade_stats AS (
         SELECT
@@ -40,23 +37,20 @@ export async function GET() {
 
     return NextResponse.json({ data: result }, { status: 200 });
   } catch (error) {
-    console.error('Error fetching grades:', error);
+    console.error("Error fetching grades:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch grades' },
+      { error: "Failed to fetch grades" },
       { status: 500 }
     );
   }
 }
 
-// POST handler for adding a new grade
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
-    // Validate input
+
     const { class: className, value } = gradeSchema.parse(body);
-    
-    // Insert grade using raw SQL
+
     const result = await sql`
       INSERT INTO grades (class, value)
       VALUES (${className}, ${value})
@@ -65,19 +59,15 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: result[0] }, { status: 201 });
   } catch (error) {
-    console.error('Error adding grade:', error);
-    
-    // Check if it's a validation error
+    console.error("Error adding grade:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid input', details: error.errors },
+        { error: "Invalid input", details: error.errors },
         { status: 400 }
       );
     }
-    
-    return NextResponse.json(
-      { error: 'Failed to add grade' },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: "Failed to add grade" }, { status: 500 });
   }
 }

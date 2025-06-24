@@ -1,16 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
-import sql from '@/lib/db';
-import { z } from 'zod';
+import { NextRequest, NextResponse } from "next/server";
+import sql from "@/lib/db";
+import { z } from "zod";
 
-// Schema for validating number input
 const numberSchema = z.object({
   value: z.number().int(),
 });
 
-// GET handler for fetching adjacent number pairs
 export async function GET() {
   try {
-    // Using a CTE (Common Table Expression) to generate adjacent pairs
     const result = await sql`
       WITH numbered_rows AS (
         SELECT
@@ -35,23 +32,20 @@ export async function GET() {
 
     return NextResponse.json({ data: result }, { status: 200 });
   } catch (error) {
-    console.error('Error fetching number pairs:', error);
+    console.error("Error fetching number pairs:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch number pairs' },
+      { error: "Failed to fetch number pairs" },
       { status: 500 }
     );
   }
 }
 
-// POST handler for adding a new number
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
-    // Validate input
+
     const { value } = numberSchema.parse(body);
-    
-    // Insert number using raw SQL
+
     const result = await sql`
       INSERT INTO numbers (value)
       VALUES (${value})
@@ -60,18 +54,17 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: result[0] }, { status: 201 });
   } catch (error) {
-    console.error('Error adding number:', error);
-    
-    // Check if it's a validation error
+    console.error("Error adding number:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid input', details: error.errors },
+        { error: "Invalid input", details: error.errors },
         { status: 400 }
       );
     }
-    
+
     return NextResponse.json(
-      { error: 'Failed to add number' },
+      { error: "Failed to add number" },
       { status: 500 }
     );
   }
