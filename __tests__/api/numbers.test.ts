@@ -1,15 +1,12 @@
-import { NextResponse } from 'next/server';
-import sql from '@/lib/db';
-import { z } from 'zod';
+import { NextResponse } from "next/server";
+import sql from "@/lib/db";
+import { z } from "zod";
 
-// Mock the SQL module
-jest.mock('@/lib/db', () => ({
+jest.mock("@/lib/db", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
-
-// Mock Next.js Response
-jest.mock('next/server', () => ({
+jest.mock("next/server", () => ({
   NextResponse: {
     json: jest.fn((data, options) => ({
       status: options?.status || 200,
@@ -18,15 +15,13 @@ jest.mock('next/server', () => ({
   },
 }));
 
-describe('/api/numbers endpoints', () => {
-  // Import handlers inside tests to avoid Request not defined errors
+describe("/api/numbers endpoints", () => {
   let GET: any, POST: any;
-  
+
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
-    
-    // Create mock handlers that simulate the API routes
+
     GET = async () => {
       try {
         const result = await sql`
@@ -50,132 +45,133 @@ describe('/api/numbers endpoints', () => {
           )
           SELECT * FROM adjacent_pairs;
         `;
-        
+
         return NextResponse.json({ data: result }, { status: 200 });
       } catch (error) {
-        return NextResponse.json({ error: 'Failed to fetch number pairs' }, { status: 500 });
+        return NextResponse.json(
+          { error: "Failed to fetch number pairs" },
+          { status: 500 }
+        );
       }
     };
-    
+
     POST = async (request: Request) => {
       try {
         const body = await request.json();
-        
-        // Validate input
+
         const schema = z.object({
           value: z.number().int(),
         });
-        
+
         const result = schema.safeParse(body);
-        
+
         if (!result.success) {
-          return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
+          return NextResponse.json({ error: "Invalid input" }, { status: 400 });
         }
-        
+
         const { value } = result.data;
-        
+
         const insertResult = await sql`
           INSERT INTO numbers (value)
           VALUES (${value})
           RETURNING id, value;
         `;
-        
+
         return NextResponse.json({ data: insertResult[0] }, { status: 201 });
       } catch (error) {
-        return NextResponse.json({ error: 'Failed to add number' }, { status: 500 });
+        return NextResponse.json(
+          { error: "Failed to add number" },
+          { status: 500 }
+        );
       }
     };
   });
 
-  describe('GET', () => {
-    it('should return adjacent number pairs', async () => {
-      // Mock data for the SQL query result
+  describe("GET", () => {
+    // Arrange
+    it("should return adjacent number pairs", async () => {
       const mockData = [
         { id1: 1, value1: 5, id2: 2, value2: 10, sum: 15 },
         { id1: 2, value1: 10, id2: 3, value2: -3, sum: 7 },
       ];
-
-      // Mock the SQL query response
       (sql as unknown as jest.Mock).mockResolvedValueOnce(mockData);
 
-      // Call the GET handler
+      // Act
       const response = await GET();
       const responseData = await response.json();
 
-      // Verify the response
+      // Assert
       expect(response.status).toBe(200);
       expect(responseData).toEqual({ data: mockData });
       expect(sql).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle errors', async () => {
-      // Mock an error in the SQL query
-      const mockError = new Error('Database error');
+    it("should handle errors", async () => {
+      // Arrange
+      const mockError = new Error("Database error");
       (sql as unknown as jest.Mock).mockRejectedValueOnce(mockError);
 
-      // Call the GET handler
+      // Act
       const response = await GET();
       const responseData = await response.json();
 
-      // Verify error handling
+      // Assert
       expect(response.status).toBe(500);
-      expect(responseData).toEqual({ error: 'Failed to fetch number pairs' });
+      expect(responseData).toEqual({ error: "Failed to fetch number pairs" });
     });
   });
 
-  describe('POST', () => {
-    it('should add a new number', async () => {
-      // Mock request with a valid number
+  describe("POST", () => {
+    it("should add a new number", async () => {
+      // Arrange
       const request = {
         json: jest.fn().mockResolvedValue({ value: 42 }),
       } as unknown as Request;
 
-      // Mock the SQL query response for insertion
       const mockInsertResult = [{ id: 1, value: 42 }];
       (sql as unknown as jest.Mock).mockResolvedValueOnce(mockInsertResult);
 
-      // Call the POST handler
+      // Act
       const response = await POST(request);
       const responseData = await response.json();
 
-      // Verify the response
+      // Assert
       expect(response.status).toBe(201);
       expect(responseData).toEqual({ data: mockInsertResult[0] });
       expect(sql).toHaveBeenCalledTimes(1);
     });
 
-    it('should validate input and return 400 for invalid data', async () => {
-      // Mock request with invalid data (string instead of number)
+    it("should validate input and return 400 for invalid data", async () => {
+      // Arrange
       const request = {
-        json: jest.fn().mockResolvedValue({ value: 'not-a-number' }),
+        json: jest.fn().mockResolvedValue({ value: "not-a-number" }),
       } as unknown as Request;
 
-      // Call the POST handler
+      // Act
       const response = await POST(request);
 
-      // Verify validation error
+      // Assert
       expect(response.status).toBe(400);
       const responseData = await response.json();
-      expect(responseData.error).toBe('Invalid input');
+      expect(responseData.error).toBe("Invalid input");
     });
 
-    it('should handle database errors', async () => {
-      // Mock request with valid data
+    it("should handle database errors", async () => {
+      // Arrange
       const request = {
         json: jest.fn().mockResolvedValue({ value: 42 }),
       } as unknown as Request;
 
-      // Mock a database error
-      const mockError = new Error('Database error');
+      const mockError = new Error("Database error");
       (sql as unknown as jest.Mock).mockRejectedValueOnce(mockError);
 
-      // Call the POST handler
+      // Act
       const response = await POST(request);
       const responseData = await response.json();
 
-      // Verify error handling
+      // Assert
       expect(response.status).toBe(500);
-      expect(responseData).toEqual({ error: 'Failed to add number' });
+      expect(responseData).toEqual({ error: "Failed to add number" });
     });
   });
 });
