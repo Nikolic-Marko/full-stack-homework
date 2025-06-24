@@ -3,6 +3,8 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { z } from "zod";
+import { handleFormError } from "@/lib/errorHandling";
+import { apiClient } from "@/lib/apiClient";
 import { fetcher } from "@/lib/fetcher";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -55,30 +57,15 @@ export default function GradesPage() {
         value: gradeValue,
       });
 
-      const response = await fetch("/api/grades", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(validatedData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to add grade");
-      }
+      await apiClient.post("/api/grades", validatedData);
 
       setSelectedClass("");
       setGradeValue("");
       mutate();
     } catch (err) {
-      if (err instanceof z.ZodError) {
-        setError("Please enter a valid class and grade (0-100).");
-      } else if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An unexpected error occurred.");
-      }
+      handleFormError(err, setError, {
+        zodError: "Please enter a valid class and grade (0-100).",
+      });
     } finally {
       setSubmitting(false);
     }

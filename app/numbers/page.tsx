@@ -4,6 +4,8 @@ import { useState } from "react";
 import useSWR from "swr";
 import { z } from "zod";
 import { fetcher } from "@/lib/fetcher";
+import { handleFormError } from "@/lib/errorHandling";
+import { apiClient } from "@/lib/apiClient";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -42,29 +44,14 @@ export default function NumbersPage() {
     try {
       const { value } = numberSchema.parse({ value: number });
 
-      const response = await fetch("/api/numbers", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ value }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to add number");
-      }
+      await apiClient.post("/api/numbers", { value });
 
       setNumber("");
       mutate();
     } catch (err) {
-      if (err instanceof z.ZodError) {
-        setError("Please enter a valid integer.");
-      } else if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An unexpected error occurred.");
-      }
+      handleFormError(err, setError, {
+        zodError: "Please enter a valid integer."
+      })
     } finally {
       setSubmitting(false);
     }
